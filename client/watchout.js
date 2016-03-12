@@ -1,11 +1,27 @@
-// initially place?
-//var dataset = [[100, 200], [300, 200]];
-// Do we have to reference the same dataset to 'remember' the old set?
-// It just doesn't make sense to me in the context of this BEING DATA
-// that you would ever want to throw away all your 'visualized data'
-// after 1 second and pull up a whole new set of visualized data, over and over
-var dataSize = 30;
+// high score variables
+var score = 0;
+var scoreNode = d3.select(".current").select('span');
+var highScore = 0;
+var highScoreNode = d3.select('.highscore').select('span');
+var collisionCount = 0;
+var collisionNode = d3.select('.collisions').select('span');
 
+
+var updateCurrentScore = function() {
+  score++;
+  if (score > highScore) {
+    highScore = score;
+    highScoreNode.text(highScore);
+  }
+  scoreNode.text(score);
+};
+// how many seconds have you survived without a collision?
+//    --- maybe refactor to start this setInterval when the mouse is clicked
+setInterval(updateCurrentScore, 1000);
+
+
+// populate data
+var dataSize = 30;
 // not optimal to hard-code, but getting value on-the-fly would require
 // sending that as a parameter to populateData and grabbing it within move
 var padding = 50; 
@@ -15,10 +31,8 @@ var h = d3.select('svg').attr('height');
 var populateData = function() {
   var newDataSet = [];
   for (var i = 0; i < dataSize; i++) {
-    // newDataSet[i][0] = Math.floor(Math.random() * w);//(h - 40) + 20);
-    // newDataSet[i][1] = Math.floor(Math.random() * h);//(w - 40) + 20);
-    var x = Math.floor(Math.random() * (w - 2 * padding) + padding);//(h - 40) + 20);
-    var y = Math.floor(Math.random() * (h - 2 * padding) + padding);//(w - 40) + 20);
+    var x = Math.floor(Math.random() * (w - 2 * padding) + padding);
+    var y = Math.floor(Math.random() * (h - 2 * padding) + padding);
     newDataSet.push([x, y]);
 
   }
@@ -26,14 +40,23 @@ var populateData = function() {
 };
 
 
+// populates new circle nodes
+d3.select('svg').selectAll('circle')
+  .data(populateData())
+  .enter()
+  .append('circle')
+  .classed('circle', true)
+  .attr('cx', function(d) { return d[0]; })
+  .attr('cy', function(d) { return d[1]; })
+  ;
 
-// put a static circle in
 
 // position the mouse and make it draggable
 var mouse = d3.select('.mouse');
 mouse.attr('x', w / 2).attr('y', h / 2);
 var drag = d3.behavior.drag();
 drag.on('drag', function() {
+  // bounds check - if player drags mouse out of board, reset position
   if (d3.event.x < 0) {
     d3.event.x = 0;
   } 
@@ -53,23 +76,7 @@ mouse.call(drag);
 
 
 
-
-
-
-
-d3.select('svg').selectAll('circle')
-  .data(populateData())
-  .enter()
-  .append('circle')
-  .classed('circle', true)
-  .attr('cx', function(d) { return d[0]; })
-  .attr('cy', function(d) { return d[1]; })
-  ;
-
-
-
-
-
+// move animates our enemies (calls itself in .each)
 var move = function() {
   var dataSet = populateData();
   d3.select('svg').selectAll('circle')
@@ -88,73 +95,47 @@ var move = function() {
 move();
 
 
-
-
-// collision detection
-// at the end setInterval with recursive call
+// collision detection with helper calculateDistance
 var calculateDistance = function(mouseX, mouseY, nodeX, nodeY) {
-  //return mouseX - nodeX;
   return Math.sqrt((mouseX - nodeX) * (mouseX - nodeX) + (mouseY - nodeY) * (mouseY - nodeY));
 };
-
 
 var checkCollision = function(enemy) {
   var enemies = d3.selectAll('circle').each(collisionWithNode);
 };
+
+// we don't want to update collisionCount for maybe 0.3 seconds after one collision
+var checkCollisionCount = 0;
+var collisionsAllowed = true;
 
 var collisionWithNode = function() {
   var x = +mouse.attr('x');
   var y = +mouse.attr('y');
   var nodeX = this.cx.animVal.value;
   var nodeY = this.cy.animVal.value;
-  //var nodeX = parseFloat(this.attr('cx'));
-  //var nodeY = parseFloat(this.attr('cy'));
-  // console.log('typeof mouse and enemy', typeof x, typeof nodeX);
-  // console.log(x, y)
   var distance = calculateDistance(x, y, nodeX, nodeY);
- // console.log('distance',distance);
-  if (distance < 20) {
-    console.log('collision');
+
+  // if there was a collision in the last 300ms (3 * the 100 in setInterval),
+  // don't allow collision count to update
+  if (!collisionsAllowed) {
+    checkCollisionCount++;
+  }
+  if (checkCollisionCount >= 10) {
+    checkCollisionCount = 0;
+    collisionsAllowed = true;
   }
 
-  // if (x <= 440 && y <= 440) {
-  // // if ( (nodeX >= x && nodeX <= x + 10)
-  // //   && (nodeY >= y && nodeY <= y + 10)
-  // //   ) {
+  // if collision then update score
+  if (distance < 20 && collisionsAllowed) {
+    
+    collisionCount++;
+    collisionNode.text(collisionCount);
+    score = 0;
 
-  //   console.log('collision');
-  //   console.log("mouse x and y", x, y);
-  //   console.log("enemy x and y", nodeX, nodeY);
-  // }
+    collisionsAllowed = false;
+  }
+
 };
-// initial call
+// initial call, then setInterval keeps it going
 checkCollision();
 setInterval(checkCollision, 100);
-
-
-
-
-// var enemies = d3.selectAll('circle');
-// for (var i = 0; i < enemies[0].length; i++) {
-//   //console.log('enemies[0][i] is', enemies[0][i]);
-// }
-// //console.log('enemies is', enemies);
-
-// var checkCollision = function(mouse) {
-//   return enemies[0].forEach(function(enemy) {
-//     var x = mouse.attr('x');
-//     var y = mouse.attr('y');
-//     var nodeX = enemy;//.cy.animVal.value;
-//     //var nodeX = parseFloat(enemy.attr('cx'));
-//     //var nodeY = parseFloat(enemy.attr('cy'));
-   
-//     if ( (nodeX >= x && nodeX <= x + 10)
-//       && (nodeY >= y && nodeY <= y + 10)
-//       ) {
-//       //console.log('collision');
-//     }
-//   });
-// };
-
-// checkCollision(mouse);
-
