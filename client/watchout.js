@@ -1,52 +1,3 @@
-// start slingin' some d3 here.
-
-
-/*
-var h = d3.select('svg').attr('height');
-var w = d3.select('svg').attr('width');
-//d3.select('svg').attr('fill', 'grey');
-
-// create data()
-// Do we have to reference the same dataset to 'remember' the old set?
-// It just doesn't make sense to me in the context of this BEING DATA
-// that you would ever want to throw away all your 'visualized data'
-// after 1 second and pull up a whole new set of visualized data, over and over
-var dataSize = 30;
-var dataset = [];
-for (var i = 0; i < dataSize; i++) {
-  dataset.push([]);
-}
-var transformData = function(dataset) {
-  for (var i = 0; i < dataSize; i++) {
-    dataset[i][0] = Math.floor(Math.random() * (h - 40) + 20);
-    dataset[i][1] = Math.floor(Math.random() * (w - 40) + 20);
-  }
-};
-transformData(dataset);
-
-// Problem: circles don't appear for 1 second
-setInterval( function() {
-  //transformData(dataset);
-  // D3 stuff
-  d3.select('svg').selectAll('circle')
-    .data(dataset)    
-    .enter()
-    .append('circle')
-    .classed('circle', true)
-    .attr('cx', function(d) {
-      return d[0] + Math.floor(Math.random() * 10 - 5);
-    })
-    .attr('cy', function(d) {
-      return d[1] + Math.floor(Math.random() * 10 - 5);
-    })
-    .transition()
-    .duration(1000)
-    //.attr('cx')
-    ;
-}, 1000 );
-
-*/
-
 // initially place?
 //var dataset = [[100, 200], [300, 200]];
 // Do we have to reference the same dataset to 'remember' the old set?
@@ -76,6 +27,8 @@ var populateData = function() {
 
 
 
+
+
 // position the mouse and make it draggable
 var mouse = d3.select('.mouse');
 mouse.attr('x', w / 2).attr('y', h / 2);
@@ -98,6 +51,12 @@ drag.on('drag', function() {
 });
 mouse.call(drag);
 
+
+
+
+
+
+
 d3.select('svg').selectAll('circle')
   .data(populateData())
   .enter()
@@ -108,12 +67,15 @@ d3.select('svg').selectAll('circle')
   ;
 
 
+
+
+
 var move = function() {
   var dataSet = populateData();
   d3.select('svg').selectAll('circle')
   .data(dataSet)
   .transition()
-  .duration(4000)
+  .duration(3000)
   .attr('cx', function(d) {
     return d[0];
   })
@@ -124,6 +86,29 @@ var move = function() {
 };
 
 move();
+
+
+
+
+// collision detection
+// at the end setInterval with recursive call
+var collisionCheck = function() {
+  var enemies = d3.selectAll('circle').each(collisionWithNode);
+};
+
+var collisionWithNode = function() {
+  var x = mouse.attr('x');
+  var y = mouse.attr('y');
+  console.log('this.cx', this.cx.animVal.value);
+  if (this.cx === x ){//|| this.attr('cy') === y) {
+    console.log("COLLISION!!");
+  }
+};
+// initial call
+collisionCheck();
+//setInterval(collisionCheck, 100);
+
+
 
 /*
 setInterval( function() {
