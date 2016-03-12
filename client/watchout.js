@@ -27,7 +27,7 @@ var populateData = function() {
 
 
 
-
+// put a static circle in
 
 // position the mouse and make it draggable
 var mouse = d3.select('.mouse');
@@ -92,38 +92,69 @@ move();
 
 // collision detection
 // at the end setInterval with recursive call
-var collisionCheck = function() {
+var calculateDistance = function(mouseX, mouseY, nodeX, nodeY) {
+  //return mouseX - nodeX;
+  return Math.sqrt((mouseX - nodeX) * (mouseX - nodeX) + (mouseY - nodeY) * (mouseY - nodeY));
+};
+
+
+var checkCollision = function(enemy) {
   var enemies = d3.selectAll('circle').each(collisionWithNode);
 };
 
 var collisionWithNode = function() {
-  var x = mouse.attr('x');
-  var y = mouse.attr('y');
-  console.log('this.cx', this.cx.animVal.value);
-  if (this.cx === x ){//|| this.attr('cy') === y) {
-    console.log("COLLISION!!");
+  var x = +mouse.attr('x');
+  var y = +mouse.attr('y');
+  var nodeX = this.cx.animVal.value;
+  var nodeY = this.cy.animVal.value;
+  //var nodeX = parseFloat(this.attr('cx'));
+  //var nodeY = parseFloat(this.attr('cy'));
+  // console.log('typeof mouse and enemy', typeof x, typeof nodeX);
+  // console.log(x, y)
+  var distance = calculateDistance(x, y, nodeX, nodeY);
+ // console.log('distance',distance);
+  if (distance < 20) {
+    console.log('collision');
   }
+
+  // if (x <= 440 && y <= 440) {
+  // // if ( (nodeX >= x && nodeX <= x + 10)
+  // //   && (nodeY >= y && nodeY <= y + 10)
+  // //   ) {
+
+  //   console.log('collision');
+  //   console.log("mouse x and y", x, y);
+  //   console.log("enemy x and y", nodeX, nodeY);
+  // }
 };
 // initial call
-collisionCheck();
-//setInterval(collisionCheck, 100);
+checkCollision();
+setInterval(checkCollision, 100);
 
 
 
-/*
-setInterval( function() {
-  d3.select('svg').selectAll('circle')
-    .data([[100, 200], [300, 200]])
-    .enter()
-    .append('circle')
-    .classed('circle', true)
-    .attr('cx', function(d) {
-      return d[0] + count * 40; // + Math.floor(Math.random() * 10 - 5)
-    })
-    .attr('cy', function(d) {
-      return d[1] + count * 40; // + Math.floor(Math.random() * 10 - 5);
-    })
-    ;
-  count++;
-}, 1000);
-*/
+
+// var enemies = d3.selectAll('circle');
+// for (var i = 0; i < enemies[0].length; i++) {
+//   //console.log('enemies[0][i] is', enemies[0][i]);
+// }
+// //console.log('enemies is', enemies);
+
+// var checkCollision = function(mouse) {
+//   return enemies[0].forEach(function(enemy) {
+//     var x = mouse.attr('x');
+//     var y = mouse.attr('y');
+//     var nodeX = enemy;//.cy.animVal.value;
+//     //var nodeX = parseFloat(enemy.attr('cx'));
+//     //var nodeY = parseFloat(enemy.attr('cy'));
+   
+//     if ( (nodeX >= x && nodeX <= x + 10)
+//       && (nodeY >= y && nodeY <= y + 10)
+//       ) {
+//       //console.log('collision');
+//     }
+//   });
+// };
+
+// checkCollision(mouse);
+
