@@ -3,3 +3,11 @@
 /* Note: an asteroid image is included in this repo.
 Feel free to use it if you like. */
 
+circle {
+  fill: black;
+  r: 5
+}
+svg {
+  border: 5px solid black;
+  background-color: gray;
+}
