@@ -73,7 +73,30 @@ var populateData = function() {
   }
   return newDataSet;
 };
-//initial setting?
+
+
+
+// position the mouse and make it draggable
+var mouse = d3.select('.mouse');
+mouse.attr('x', w / 2).attr('y', h / 2);
+var drag = d3.behavior.drag();
+drag.on('drag', function() {
+  if (d3.event.x < 0) {
+    d3.event.x = 0;
+  } 
+  if (d3.event.x > w - 10) {
+    d3.event.x = w - 10;
+  } 
+  if (d3.event.y < 0) {
+    d3.event.y = 0;
+  }  
+  if (d3.event.y > h - 10) {
+    d3.event.y = h - 10;
+  }
+  mouse.attr('x', d3.event.x);
+  mouse.attr('y', d3.event.y);
+});
+mouse.call(drag);
 
 d3.select('svg').selectAll('circle')
   .data(populateData())
@@ -90,7 +113,7 @@ var move = function() {
   d3.select('svg').selectAll('circle')
   .data(dataSet)
   .transition()
-  .duration(2000)
+  .duration(4000)
   .attr('cx', function(d) {
     return d[0];
   })
