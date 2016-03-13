@@ -1,3 +1,6 @@
+// stick in the shuriken
+//d3.select('body').append('<img src="shuriken.png" height="20px" width="20px">');
+
 // high score variables
 var score = 0;
 var scoreNode = d3.select(".current").select('span');
@@ -38,6 +41,16 @@ var populateData = function() {
   }
   return newDataSet;
 };
+
+d3.select('svg').selectAll('image')
+  .data([100])
+  .enter()
+  .append('image')
+  .classed('shuriken', true)
+  .attr('xlink:href', 'shuriken.svg')
+  .attr('x', Math.floor(Math.random() * (w - 2 * padding) + padding))
+  .attr('y', Math.floor(Math.random() * (h - 2 * padding) + padding))
+  ;
 
 
 // populates new circle nodes
@@ -117,25 +130,25 @@ var collisionWithNode = function() {
 
   // if there was a collision in the last 300ms (3 * the 100 in setInterval),
   // don't allow collision count to update
-  if (!collisionsAllowed) {
-    checkCollisionCount++;
-  }
-  if (checkCollisionCount >= 10) {
-    checkCollisionCount = 0;
-    collisionsAllowed = true;
-  }
+  // if (!collisionsAllowed) {
+  //   checkCollisionCount++;
+  // }
+  // if (checkCollisionCount >= 10) {
+  //   checkCollisionCount = 0;
+  //   collisionsAllowed = true;
+  // }
 
   // if collision then update score
-  if (distance < 20 && collisionsAllowed) {
+  if (distance < 20) {// && collisionsAllowed) {
     
     collisionCount++;
     collisionNode.text(collisionCount);
     score = 0;
 
-    collisionsAllowed = false;
+    // collisionsAllowed = false;
   }
 
 };
 // initial call, then setInterval keeps it going
 checkCollision();
-setInterval(checkCollision, 100);
+setInterval(checkCollision, 400);
